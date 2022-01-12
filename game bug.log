@@ -1,0 +1,57 @@
+Player 1's turn
+Card: Reverse { color: Blue }
+
+Matching cards:
+
+Number { color: Blue, number: 3 }
+--------------------------------------------------------------------------------
+Non-matching cards:
+
+Skip { color: Yellow }
+Skip { color: Red }
+Number { color: Red, number: 5 }
+Number { color: Green, number: 9 }
+Number { color: Yellow, number: 7 }
+Number { color: Red, number: 4 }
+Number { color: Green, number: 2 }
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+Player 0's turn
+Card: Number { color: Blue, number: 3 }
+
+Matching cards:
+
+--------------------------------------------------------------------------------
+Non-matching cards:
+
+Number { color: Red, number: 6 }
+DrawTwo { color: Red }
+Number { color: Red, number: 7 }
+Number { color: Green, number: 0 }
+Reverse { color: Yellow }
+--------------------------------------------------------------------------------
+--------------------------------------------------------------------------------
+
+Player 1's turn
+Card: Number { color: Blue, number: 1 }
+
+Matching cards:
+
+--------------------------------------------------------------------------------
+Non-matching cards:
+
+Skip { color: Yellow }
+Skip { color: Red }
+Number { color: Red, number: 5 }
+Number { color: Green, number: 9 }
+Number { color: Yellow, number: 7 }
+Number { color: Red, number: 4 }
+Number { color: Green, number: 2 }
+--------------------------------------------------------------------------------
+        Taking: Number { color: Green, number: 4 }
+        Taking: Number { color: Red, number: 0 }
+        Taking: Number { color: Green, number: 3 }
+        Taking: Skip { color: Red }
+        Taking: Reverse { color: Blue }
+--------------------------------------------------------------------------------
