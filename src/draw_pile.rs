@@ -37,7 +37,7 @@ impl DrawPile {
         }
 
         for _ in 0..4 {
-            cards.push(Card::Wild);
+            cards.push(Card::Wild { color: Color::All });
             cards.push(Card::WildDrawFour);
         }
 
@@ -51,25 +51,6 @@ impl DrawPile {
 
         DrawPile { cards }
     }
-
-    /* pub fn draw_cards2(&mut self, n: usize) -> Vec<Card> {
-        let mut cards = self.draw_pile.draw(n);
-        let draw_size = cards.len();
-
-        if draw_size < n {
-            // Empty draw pile, so we need to draw from discard pile
-            if discarded_cards.len() == 0 {
-                // No cards in draw AND discard pile, so we need a new deck (higly unlikely)
-                // That means we are holding all of the 112 cards
-                self.draw_pile = DrawPile::new();
-            } else {
-                // Cards in discard pile, so we can reuse them
-                self.draw_pile = DrawPile::from_discard_pile(discarded_cards);
-            }
-        }
-
-        cards
-    } */
 
     pub fn draw_cards(&mut self, n: usize, discard_pile: &mut DiscardPile) -> Vec<Card> {
         let mut drawn_cards: Vec<Card> = Vec::new();
@@ -96,20 +77,4 @@ impl DrawPile {
 
         drawn_cards
     }
-
-    /* pub fn draw(&mut self, n: usize) -> Vec<Card> {
-        let mut drawn_cards: Vec<Card> = Vec::new();
-
-        if self.cards.len() > n {
-            self.cards.drain(..n).for_each(|card| {
-                drawn_cards.push(card);
-            });
-        } else {
-            self.cards.drain(..).for_each(|card| {
-                drawn_cards.push(card);
-            });
-        }
-
-        drawn_cards
-    } */
 }

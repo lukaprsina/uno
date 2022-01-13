@@ -1,7 +1,7 @@
 use uno::Game;
 
 fn main() {
-    let mut game = Game::new(2);
+    let mut game = Game::new(5);
 
     game.start();
 }

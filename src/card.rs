@@ -4,6 +4,7 @@ pub enum Color {
     Blue,
     Yellow,
     Green,
+    All,
 }
 
 #[derive(Clone, Debug)]
@@ -12,10 +13,11 @@ pub enum Card {
     Reverse { color: Color },
     Skip { color: Color },
     DrawTwo { color: Color },
-    Wild,
+    Wild { color: Color },
     WildDrawFour,
 }
 
+// TODO: the comparisons are not equal if turned around
 impl PartialEq for Card {
     fn eq(&self, other: &Self) -> bool {
         use crate::Card::*;
@@ -54,11 +56,14 @@ impl PartialEq for Card {
             ) => c1 == c2,
             (
                 Number {
-                    color: _,
+                    color: c1,
                     number: _,
                 },
-                Wild,
-            ) => true,
+                Wild { color: c2 },
+            ) => match c2 {
+                Color::All => true,
+                _ => c1 == c2,
+            },
             (
                 Number {
                     color: _,
@@ -76,7 +81,10 @@ impl PartialEq for Card {
             (Reverse { color: c1 }, Reverse { color: c2 }) => c1 == c2,
             (Reverse { color: c1 }, Skip { color: c2 }) => c1 == c2,
             (Reverse { color: c1 }, DrawTwo { color: c2 }) => c1 == c2,
-            (Reverse { color: _ }, Wild) => true,
+            (Reverse { color: c1 }, Wild { color: c2 }) => match c2 {
+                Color::All => true,
+                _ => c1 == c2,
+            },
             (Reverse { color: _ }, WildDrawFour) => true,
             (
                 Skip { color: c1 },
@@ -88,7 +96,10 @@ impl PartialEq for Card {
             (Skip { color: c1 }, Reverse { color: c2 }) => c1 == c2,
             (Skip { color: c1 }, Skip { color: c2 }) => c1 == c2,
             (Skip { color: c1 }, DrawTwo { color: c2 }) => c1 == c2,
-            (Skip { color: _ }, Wild) => true,
+            (Skip { color: c1 }, Wild { color: c2 }) => match c2 {
+                Color::All => true,
+                _ => c1 == c2,
+            },
             (Skip { color: _ }, WildDrawFour) => true,
             (
                 DrawTwo { color: c1 },
@@ -100,20 +111,41 @@ impl PartialEq for Card {
             (DrawTwo { color: c1 }, Reverse { color: c2 }) => c1 == c2,
             (DrawTwo { color: c1 }, Skip { color: c2 }) => c1 == c2,
             (DrawTwo { color: c1 }, DrawTwo { color: c2 }) => c1 == c2,
-            (DrawTwo { color: _ }, Wild) => true,
+            (DrawTwo { color: c1 }, Wild { color: c2 }) => match c2 {
+                Color::All => true,
+                _ => c1 == c2,
+            },
             (DrawTwo { color: _ }, WildDrawFour) => true,
             (
-                Wild,
+                Wild { color: c1 },
                 Number {
-                    color: _,
+                    color: c2,
                     number: _,
                 },
-            ) => true,
-            (Wild, Reverse { color: _ }) => true,
-            (Wild, Skip { color: _ }) => true,
-            (Wild, DrawTwo { color: _ }) => true,
-            (Wild, Wild) => true,
-            (Wild, WildDrawFour) => true,
+            ) => match c1 {
+                Color::All => true,
+                _ => c1 == c2,
+            },
+            (Wild { color: c1 }, Reverse { color: c2 }) => match c1 {
+                Color::All => true,
+                _ => c1 == c2,
+            },
+            (Wild { color: c1 }, Skip { color: c2 }) => match c1 {
+                Color::All => true,
+                _ => c1 == c2,
+            },
+            (Wild { color: c1 }, DrawTwo { color: c2 }) => match c1 {
+                Color::All => true,
+                _ => c1 == c2,
+            },
+            (Wild { color: c1 }, Wild { color: c2 }) => {
+                if c1 == &Color::All || c2 == &Color::All {
+                    true
+                } else {
+                    c1 == c2
+                }
+            }
+            (Wild { color: _ }, WildDrawFour) => true,
             (
                 WildDrawFour,
                 Number {
@@ -124,7 +156,7 @@ impl PartialEq for Card {
             (WildDrawFour, Reverse { color: _ }) => true,
             (WildDrawFour, Skip { color: _ }) => true,
             (WildDrawFour, DrawTwo { color: _ }) => true,
-            (WildDrawFour, Wild) => true,
+            (WildDrawFour, Wild { color: _ }) => true,
             (WildDrawFour, WildDrawFour) => true,
         }
     }

@@ -1,4 +1,4 @@
-use super::{Card, DiscardPile, DrawPile, Player};
+use super::{card::Color, Card, DiscardPile, DrawPile, Player};
 
 #[derive(Clone, Debug)]
 pub struct Game {
@@ -45,7 +45,7 @@ impl Game {
         }
     }
 
-    pub fn run_card_action(&mut self, card: &Card) {
+    pub fn run_card_action(&mut self, card: &mut Card, other: &Card) {
         match card {
             Card::Number {
                 color: _,
@@ -55,9 +55,25 @@ impl Game {
             Card::Skip { color: _ } => self.index = self.get_next_player(),
             Card::DrawTwo { color: _ } => self.players[self.get_next_player() as usize]
                 .add_card(&self.draw_pile.draw_cards(2, &mut self.discard_pile)),
-            Card::Wild => (),
+            // TODO: add action to wild cards
+            Card::Wild { color: _ } => {
+                *card = Card::Wild {
+                    color: self.choose_color(other),
+                }
+            }
             Card::WildDrawFour => self.players[self.get_next_player() as usize]
                 .add_card(&self.draw_pile.draw_cards(4, &mut self.discard_pile)),
+        }
+    }
+
+    pub fn choose_color(&self, other: &Card) -> Color {
+        match other {
+            Card::Number { color, number: _ } => color.clone(),
+            Card::Reverse { color } => color.clone(),
+            Card::Skip { color } => color.clone(),
+            Card::DrawTwo { color } => color.clone(),
+            Card::Wild { color } => color.clone(),
+            Card::WildDrawFour => Color::Blue,
         }
     }
 
@@ -81,12 +97,11 @@ impl Game {
                 &card
             );
             let player = &mut self.players[self.index as usize];
-            if let Some(chosen_card) =
+            if let Some(mut chosen_card) =
                 player.choose_card(&card, &mut self.draw_pile, &mut self.discard_pile)
             {
+                self.run_card_action(&mut chosen_card, &card);
                 self.discard_pile.place_cards(&[chosen_card.clone()]);
-
-                self.run_card_action(&chosen_card);
             } else {
                 break;
             }
@@ -95,23 +110,5 @@ impl Game {
         }
 
         println!("Player {} won!\n{:?}", self.index, self.players);
-    }
-}
-
-// a test
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn test_game() {
-        let game = Game {
-            players: vec![Player::new(), Player::new()],
-            clockwise: false,
-            index: 0,
-            discard_pile: DiscardPile::new(),
-            draw_pile: DrawPile::new(),
-        };
-        println!("{}", game.get_next_player());
     }
 }

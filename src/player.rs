@@ -61,12 +61,15 @@ impl Player {
             let card = self.hand.borrow_mut().remove(indexes[0]);
             chosen_card = card;
         } else {
-            let mut new_card = draw_pile.draw_cards(1, discard_pile)[0].clone();
-
-            while &new_card != other {
-                self.add_card(&[new_card.clone()]);
+            let mut new_card: Card;
+            loop {
                 new_card = draw_pile.draw_cards(1, discard_pile)[0].clone();
+                self.add_card(&[new_card.clone()]);
                 println!("\tTaking: {:?}", new_card);
+
+                if &new_card == other {
+                    break;
+                }
             }
 
             chosen_card = new_card;
