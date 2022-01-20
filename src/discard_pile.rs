@@ -11,7 +11,12 @@ impl DiscardPile {
     }
 
     pub fn reuse_cards(&mut self) -> Vec<Card> {
-        std::mem::replace(&mut self.cards, Vec::new())
+        let last_card = self
+            .cards
+            .last()
+            .expect("Can't reuse cards from empty discard pile")
+            .clone();
+        std::mem::replace(&mut self.cards, vec![last_card])
     }
 
     // TODO: maybe dont clone

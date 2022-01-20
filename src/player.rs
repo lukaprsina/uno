@@ -95,4 +95,12 @@ impl Player {
     pub fn add_score(&mut self, score: i32) {
         self.score += score;
     }
+
+    pub fn get_score(&self) -> i32 {
+        self.score
+    }
+
+    pub fn clear_hand(&mut self) {
+        self.hand.borrow_mut().clear();
+    }
 }

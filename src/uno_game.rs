@@ -28,6 +28,20 @@ impl Game {
         }
     }
 
+    pub fn new_from_players(players: &mut Vec<Player>) -> Game {
+        let discard_pile = DiscardPile::new();
+        let draw_pile = DrawPile::new();
+
+        players.iter_mut().for_each(|player| player.clear_hand());
+        Game {
+            players: players.to_vec(),
+            draw_pile,
+            discard_pile,
+            clockwise: true,
+            index: 0i32,
+        }
+    }
+
     pub fn get_next_player(&self) -> i32 {
         let increment;
 
@@ -80,15 +94,25 @@ impl Game {
         }
     }
 
-    pub fn start(&mut self) {
+    pub fn start(&mut self, max_score: i32) {
+        loop {
+            let win_player_index = self.play_one_game();
+
+            if self.players[win_player_index as usize].get_score() >= max_score {
+                break;
+            } else {
+                *self = Game::new_from_players(&mut self.players);
+            }
+        }
+    }
+
+    pub fn play_one_game(&mut self) -> i32 {
         for _ in 0..7 {
             for player in &self.players {
                 let cards = self.draw_pile.draw_cards(1, &mut self.discard_pile);
                 player.add_cards(&cards);
             }
         }
-
-        // self.draw_pile.test();
 
         let mut beginning_card: Card;
         loop {
@@ -143,6 +167,7 @@ impl Game {
 
         let score = self.score_cards();
         self.players[self.index as usize].add_score(score);
+        self.index
     }
 
     pub fn score_cards(&mut self) -> i32 {
