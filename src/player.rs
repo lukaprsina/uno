@@ -25,21 +25,27 @@ impl Player {
         draw_pile: &mut DrawPile,
         discard_pile: &mut DiscardPile,
     ) -> Option<Card> {
-        let indexes: Vec<usize> = self
-            .hand
-            .borrow()
-            .iter()
-            .enumerate()
-            .filter_map(
-                |(position, this)| {
-                    if this == other {
-                        Some(position)
-                    } else {
-                        None
-                    }
-                },
-            )
-            .collect();
+        let mut other_indexes: Vec<usize> = Vec::new();
+        let mut wild_four_indexes: Vec<usize> = Vec::new();
+        let mut indexes: Vec<usize> = Vec::new();
+
+        for (position, this) in self.hand.borrow().iter().enumerate() {
+            if this == other {
+                if let Card::WildDrawFour = *this {
+                    wild_four_indexes.push(position);
+                } else {
+                    other_indexes.push(position);
+                }
+            }
+        }
+
+        if other_indexes.is_empty() {
+            if !wild_four_indexes.is_empty() {
+                indexes = wild_four_indexes;
+            }
+        } else {
+            indexes = other_indexes;
+        }
 
         println!("\nMatching cards:\n");
         indexes

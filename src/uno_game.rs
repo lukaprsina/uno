@@ -67,8 +67,11 @@ impl Game {
             } => (),
             Card::Reverse { color: _ } => self.clockwise = !self.clockwise,
             Card::Skip { color: _ } => self.index = self.get_next_player(),
-            Card::DrawTwo { color: _ } => self.players[self.get_next_player() as usize]
-                .add_cards(&self.draw_pile.draw_cards(2, &mut self.discard_pile)),
+            Card::DrawTwo { color: _ } => {
+                self.players[self.get_next_player() as usize]
+                    .add_cards(&self.draw_pile.draw_cards(2, &mut self.discard_pile));
+                self.index = self.get_next_player();
+            }
 
             Card::Wild { color: _ } => match other {
                 Some(other) => {
@@ -78,8 +81,11 @@ impl Game {
                 }
                 None => (),
             },
-            Card::WildDrawFour => self.players[self.get_next_player() as usize]
-                .add_cards(&self.draw_pile.draw_cards(4, &mut self.discard_pile)),
+            Card::WildDrawFour => {
+                self.players[self.get_next_player() as usize]
+                    .add_cards(&self.draw_pile.draw_cards(4, &mut self.discard_pile));
+                self.index = self.get_next_player();
+            }
         }
     }
 
