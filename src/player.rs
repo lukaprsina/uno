@@ -4,16 +4,18 @@ use std::cell::RefCell;
 #[derive(Clone, Debug)]
 pub struct Player {
     hand: RefCell<Vec<Card>>,
+    score: i32,
 }
 
 impl Player {
     pub fn new() -> Player {
         Player {
             hand: RefCell::new(Vec::new()),
+            score: 0,
         }
     }
 
-    pub fn add_card(&self, cards: &[Card]) {
+    pub fn add_cards(&self, cards: &[Card]) {
         self.hand.borrow_mut().extend_from_slice(cards);
     }
 
@@ -23,7 +25,7 @@ impl Player {
         draw_pile: &mut DrawPile,
         discard_pile: &mut DiscardPile,
     ) -> Option<Card> {
-        let indexes: Vec<_> = self
+        let indexes: Vec<usize> = self
             .hand
             .borrow()
             .iter()
@@ -51,34 +53,46 @@ impl Player {
             .iter()
             .enumerate()
             .filter(|(index, _)| !indexes.contains(index))
-            .for_each(|(_, card)| println!("{:?}", card));
+            .for_each(|(_, card)| println!("{card:?}"));
 
         println!("{}", "-".repeat(80));
 
-        let chosen_card: Card;
-
         if indexes.len() > 0 {
-            let card = self.hand.borrow_mut().remove(indexes[0]);
-            chosen_card = card;
+            Some(self.hand.borrow_mut().remove(indexes[0]))
         } else {
-            let mut new_card: Card;
-            loop {
-                new_card = draw_pile.draw_cards(1, discard_pile)[0].clone();
-                self.add_card(&[new_card.clone()]);
-                println!("\tTaking: {:?}", new_card);
+            let new_card = draw_pile.draw_cards(1, discard_pile).remove(0);
 
-                if &new_card == other {
-                    break;
-                }
+            println!("\tTaking: {new_card:?}");
+            self.add_cards(&[new_card.clone()]);
+
+            if &new_card == other {
+                Some(new_card)
+            } else {
+                None
             }
-
-            chosen_card = new_card;
         }
+    }
 
-        if self.hand.borrow().len() == 0 {
-            None
-        } else {
-            Some(chosen_card)
-        }
+    pub fn has_no_cards(&self) -> bool {
+        self.hand.borrow().len() == 0
+    }
+
+    pub fn score_cards(&self) -> i32 {
+        self.hand
+            .borrow()
+            .iter()
+            .map(|card| match card {
+                Card::Number { color: _, number } => *number as i32,
+                Card::Reverse { color: _ } => 20i32,
+                Card::Skip { color: _ } => 20i32,
+                Card::DrawTwo { color: _ } => 20i32,
+                Card::Wild { color: _ } => 50i32,
+                Card::WildDrawFour => 50i32,
+            })
+            .sum()
+    }
+
+    pub fn add_score(&mut self, score: i32) {
+        self.score += score;
     }
 }

@@ -55,14 +55,13 @@ impl DrawPile {
     pub fn draw_cards(&mut self, n: usize, discard_pile: &mut DiscardPile) -> Vec<Card> {
         let mut drawn_cards: Vec<Card> = Vec::new();
 
-        if self.cards.len() > n {
-            self.cards.drain(..n).for_each(|card| {
-                drawn_cards.push(card);
-            });
+        if self.cards.len() >= n {
+            // ..n
+            drawn_cards.append(&mut self.cards.drain(..n).collect::<Vec<Card>>());
         } else {
-            self.cards.drain(..).for_each(|card| {
-                drawn_cards.push(card);
-            });
+            let length = self.cards.len();
+            // ..
+            drawn_cards.append(&mut self.cards.drain(..).collect::<Vec<Card>>());
             let discarded_cards = discard_pile.reuse_cards();
 
             if discarded_cards.len() == 0 {
@@ -73,8 +72,23 @@ impl DrawPile {
                 // Cards in discard pile, so we can reuse them
                 *self = DrawPile::from_discard_pile(discarded_cards);
             }
+
+            // ..n-length
+            drawn_cards.append(&mut self.cards.drain(..n - length).collect::<Vec<Card>>());
         }
 
         drawn_cards
     }
+
+    pub fn insert_and_shuffle(&mut self, card: Card) {
+        self.cards.push(card);
+        self.cards.shuffle(&mut thread_rng());
+    }
+}
+
+// a test
+#[cfg(test)]
+mod tests {
+    #[test]
+    fn test_draw_pile_new() {}
 }

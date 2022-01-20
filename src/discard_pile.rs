@@ -14,6 +14,7 @@ impl DiscardPile {
         std::mem::replace(&mut self.cards, Vec::new())
     }
 
+    // TODO: maybe dont clone
     pub fn place_cards(&mut self, cards: &[Card]) {
         self.cards.extend(cards.iter().cloned());
     }

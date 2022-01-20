@@ -45,7 +45,7 @@ impl Game {
         }
     }
 
-    pub fn run_card_action(&mut self, card: &mut Card, other: &Card) {
+    pub fn run_card_action(&mut self, card: &mut Card, other: Option<&Card>) {
         match card {
             Card::Number {
                 color: _,
@@ -54,15 +54,18 @@ impl Game {
             Card::Reverse { color: _ } => self.clockwise = !self.clockwise,
             Card::Skip { color: _ } => self.index = self.get_next_player(),
             Card::DrawTwo { color: _ } => self.players[self.get_next_player() as usize]
-                .add_card(&self.draw_pile.draw_cards(2, &mut self.discard_pile)),
-            // TODO: add action to wild cards
-            Card::Wild { color: _ } => {
-                *card = Card::Wild {
-                    color: self.choose_color(other),
+                .add_cards(&self.draw_pile.draw_cards(2, &mut self.discard_pile)),
+
+            Card::Wild { color: _ } => match other {
+                Some(other) => {
+                    *card = Card::Wild {
+                        color: self.choose_color(other),
+                    };
                 }
-            }
+                None => (),
+            },
             Card::WildDrawFour => self.players[self.get_next_player() as usize]
-                .add_card(&self.draw_pile.draw_cards(4, &mut self.discard_pile)),
+                .add_cards(&self.draw_pile.draw_cards(4, &mut self.discard_pile)),
         }
     }
 
@@ -81,12 +84,35 @@ impl Game {
         for _ in 0..7 {
             for player in &self.players {
                 let cards = self.draw_pile.draw_cards(1, &mut self.discard_pile);
-                player.add_card(&cards);
+                player.add_cards(&cards);
             }
         }
 
-        let beginning_card = self.draw_pile.draw_cards(1, &mut self.discard_pile);
-        self.discard_pile.place_cards(&beginning_card);
+        // self.draw_pile.test();
+
+        let mut beginning_card: Card;
+        loop {
+            beginning_card = self
+                .draw_pile
+                .draw_cards(1, &mut self.discard_pile)
+                .remove(0);
+
+            match beginning_card {
+                Card::WildDrawFour => {
+                    self.draw_pile.insert_and_shuffle(beginning_card);
+                }
+                Card::Wild { color: _ } => {
+                    beginning_card = Card::Wild {
+                        color: self.choose_color(&beginning_card),
+                    };
+                    break;
+                }
+                _ => break,
+            }
+        }
+
+        self.run_card_action(&mut beginning_card, None);
+        self.discard_pile.place_cards(&[beginning_card]);
 
         loop {
             let card = self.discard_pile.get_top_card().clone();
@@ -96,13 +122,17 @@ impl Game {
                 self.index,
                 &card
             );
+
             let player = &mut self.players[self.index as usize];
+
             if let Some(mut chosen_card) =
                 player.choose_card(&card, &mut self.draw_pile, &mut self.discard_pile)
             {
-                self.run_card_action(&mut chosen_card, &card);
-                self.discard_pile.place_cards(&[chosen_card.clone()]);
-            } else {
+                self.run_card_action(&mut chosen_card, Some(&card));
+                self.discard_pile.place_cards(&[chosen_card]);
+            }
+
+            if self.players[self.index as usize].has_no_cards() {
                 break;
             }
 
@@ -110,5 +140,15 @@ impl Game {
         }
 
         println!("Player {} won!\n{:?}", self.index, self.players);
+
+        let score = self.score_cards();
+        self.players[self.index as usize].add_score(score);
+    }
+
+    pub fn score_cards(&mut self) -> i32 {
+        self.players
+            .iter()
+            .map(|player| player.score_cards())
+            .sum::<i32>()
     }
 }
