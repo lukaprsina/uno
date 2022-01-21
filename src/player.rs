@@ -1,7 +1,7 @@
 use super::{Card, DiscardPile, DrawPile};
 use std::cell::RefCell;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct Player {
     hand: RefCell<Vec<Card>>,
     score: i32,
@@ -63,7 +63,7 @@ impl Player {
 
         println!("{}", "-".repeat(80));
 
-        if indexes.len() > 0 {
+        if !indexes.is_empty() {
             Some(self.hand.borrow_mut().remove(indexes[0]))
         } else {
             let new_card = draw_pile.draw_cards(1, discard_pile).remove(0);
@@ -80,7 +80,7 @@ impl Player {
     }
 
     pub fn has_no_cards(&self) -> bool {
-        self.hand.borrow().len() == 0
+        self.hand.borrow().is_empty()
     }
 
     pub fn score_cards(&self) -> i32 {

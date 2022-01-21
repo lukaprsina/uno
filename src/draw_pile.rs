@@ -3,7 +3,7 @@ use super::DiscardPile;
 use rand::seq::SliceRandom;
 use rand::thread_rng;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DrawPile {
     cards: Vec<Card>,
 }
@@ -60,11 +60,12 @@ impl DrawPile {
             drawn_cards.append(&mut self.cards.drain(..n).collect::<Vec<Card>>());
         } else {
             let length = self.cards.len();
+            // println!("\t\t{:?}", self.cards);
             // ..
             drawn_cards.append(&mut self.cards.drain(..).collect::<Vec<Card>>());
             let discarded_cards = discard_pile.reuse_cards();
 
-            if discarded_cards.len() == 0 {
+            if discarded_cards.is_empty() {
                 // No cards in draw AND discard pile, so we need a new deck (higly unlikely)
                 // That means we are holding all of the 112 cards
                 *self = DrawPile::new();
@@ -74,6 +75,7 @@ impl DrawPile {
             }
 
             // ..n-length
+            // println!("n: {}, length: {}", n, length);
             drawn_cards.append(&mut self.cards.drain(..n - length).collect::<Vec<Card>>());
         }
 
@@ -84,11 +86,4 @@ impl DrawPile {
         self.cards.push(card);
         self.cards.shuffle(&mut thread_rng());
     }
-}
-
-// a test
-#[cfg(test)]
-mod tests {
-    #[test]
-    fn test_draw_pile_new() {}
 }

@@ -1,6 +1,6 @@
 use super::Card;
 
-#[derive(Clone, Debug)]
+#[derive(Clone, Debug, Default)]
 pub struct DiscardPile {
     cards: Vec<Card>,
 }
@@ -19,9 +19,12 @@ impl DiscardPile {
         std::mem::replace(&mut self.cards, vec![last_card])
     }
 
-    // TODO: maybe dont clone
-    pub fn place_cards(&mut self, cards: &[Card]) {
-        self.cards.extend(cards.iter().cloned());
+    pub fn place_cards(&mut self, cards: &mut Vec<Card>) {
+        self.cards.append(cards);
+    }
+
+    pub fn place_card(&mut self, card: &Card) {
+        self.cards.push(card.clone());
     }
 
     pub fn get_top_card(&self) -> &Card {

@@ -43,13 +43,7 @@ impl Game {
     }
 
     pub fn get_next_player(&self) -> i32 {
-        let increment;
-
-        if self.clockwise {
-            increment = 1;
-        } else {
-            increment = -1;
-        }
+        let increment = if self.clockwise { 1 } else { -1 };
 
         let index = (self.index + increment) % self.players.len() as i32;
         if index.is_negative() {
@@ -73,14 +67,13 @@ impl Game {
                 self.index = self.get_next_player();
             }
 
-            Card::Wild { color: _ } => match other {
-                Some(other) => {
+            Card::Wild { color: _ } => {
+                if let Some(other) = other {
                     *card = Card::Wild {
                         color: self.choose_color(other),
                     };
                 }
-                None => (),
-            },
+            }
             Card::WildDrawFour => {
                 self.players[self.get_next_player() as usize]
                     .add_cards(&self.draw_pile.draw_cards(4, &mut self.discard_pile));
@@ -109,6 +102,8 @@ impl Game {
             } else {
                 *self = Game::new_from_players(&mut self.players);
             }
+
+            println!("{}{}", "-".repeat(80), "\n".repeat(10));
         }
     }
 
@@ -142,7 +137,7 @@ impl Game {
         }
 
         self.run_card_action(&mut beginning_card, None);
-        self.discard_pile.place_cards(&[beginning_card]);
+        self.discard_pile.place_card(&beginning_card);
 
         loop {
             let card = self.discard_pile.get_top_card().clone();
@@ -159,7 +154,7 @@ impl Game {
                 player.choose_card(&card, &mut self.draw_pile, &mut self.discard_pile)
             {
                 self.run_card_action(&mut chosen_card, Some(&card));
-                self.discard_pile.place_cards(&[chosen_card]);
+                self.discard_pile.place_card(&chosen_card);
             }
 
             if self.players[self.index as usize].has_no_cards() {
